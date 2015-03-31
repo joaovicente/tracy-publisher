@@ -1,11 +1,8 @@
 package com.apm4all.tracy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
@@ -38,6 +35,7 @@ public class TracyPublisherTest {
 //		tomcat.getServer().await();
 	}
 
+	@SuppressWarnings("unused")
 	private String post(String tracySegment) throws ClientProtocolException, IOException	{
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost("http://localhost:8080/tracy/segment");
@@ -52,11 +50,8 @@ public class TracyPublisherTest {
 		try {
 		    System.out.println(response.getStatusLine());
 		    HttpEntity entity = response.getEntity();
-		    // do something useful with the response body
-		    // and ensure it is fully consumed
 		    responseString = EntityUtils.toString(entity, "UTF-8");
 		    System.out.println(responseString);
-		    EntityUtils.consume(entity);
 		} finally {
 		    response.close();
 		}
@@ -70,10 +65,7 @@ public class TracyPublisherTest {
 		Tracy.before("myLabel1");
 		// FIXME: replace with Tracy.getEventsAsJson()
 		String tracySegment = Tracy.getEventsAsJson().get(0);
-		String postResponse = this.post(tracySegment);
-		
-//		pub.publish(tracySegment);
-		assertEquals(tracySegment, postResponse);
+		assertTrue(pub.publish(tracySegment));
 	}
 
 }

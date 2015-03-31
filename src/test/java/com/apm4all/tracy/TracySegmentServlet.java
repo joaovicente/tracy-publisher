@@ -18,8 +18,7 @@ public class TracySegmentServlet extends HttpServlet{
 	protected void doGet(final HttpServletRequest req,
 			final HttpServletResponse res) throws ServletException, IOException {
 		res.getWriter()
-				.append(String.format("It's %s now\n\n\n\nwww.hascode.com",
-						new Date()));
+				.append(String.format("It's %s now\n\n\n\n", new Date()));
 	}
 	
 	@Override
@@ -55,8 +54,6 @@ public class TracySegmentServlet extends HttpServlet{
 	    }
 
 	    body = stringBuilder.toString();
-		
-//		res.getWriter().append(String.format("It's %s now\n\n\n\nwww.hascode.com", new Date()));
 		res.getWriter().append(body);
 	}	
 }
