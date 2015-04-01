@@ -46,6 +46,7 @@ public class TracyPublisher {
     	sb.append(response.getStatusLine());
     	sb.append(" ");
     	sb.append(EntityUtils.toString(entity, StandardCharsets.UTF_8));
+		EntityUtils.consume(entity);
     	return sb.toString();
     }
     

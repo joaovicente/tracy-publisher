@@ -59,7 +59,7 @@ public class TracyPublisherTest {
 	}
 	
 	@Test
-	public void test() throws LifecycleException, ClientProtocolException, IOException {
+	public void testSingleTracySegmentPost() throws LifecycleException, ClientProtocolException, IOException {
 		Tracy.setContext("MyTask", "null", "MyComponent");
 		Tracy.before("myLabel1");
 		Tracy.before("myLabel1");
