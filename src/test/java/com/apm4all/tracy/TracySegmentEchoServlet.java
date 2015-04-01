@@ -4,23 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Date;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class TracySegmentServlet extends HttpServlet{
+public class TracySegmentEchoServlet extends HttpServlet{
 	private static final long serialVersionUID = 1L;
 	 
-	@Override
-	protected void doGet(final HttpServletRequest req,
-			final HttpServletResponse res) throws ServletException, IOException {
-		res.getWriter()
-				.append(String.format("It's %s now\n\n\n\n", new Date()));
-	}
-	
 	@Override
 	protected void doPost(final HttpServletRequest req,
 			final HttpServletResponse res) throws ServletException, IOException {

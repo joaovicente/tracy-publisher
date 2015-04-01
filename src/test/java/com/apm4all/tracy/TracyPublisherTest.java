@@ -29,7 +29,7 @@ public class TracyPublisherTest {
 		tomcat.setPort(8080);
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		Context rootCtx = tomcat.addContext("/tracy", base.getAbsolutePath());
-		Tomcat.addServlet(rootCtx, "segment", new TracySegmentServlet());
+		Tomcat.addServlet(rootCtx, "segment", new TracySegmentLightServlet());
 		rootCtx.addServletMapping("/segment", "segment");
 		tomcat.start();
 //		tomcat.getServer().await();

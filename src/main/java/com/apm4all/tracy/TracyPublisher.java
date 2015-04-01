@@ -18,6 +18,9 @@ package com.apm4all.tracy;
 
 import java.io.IOException;
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
@@ -27,8 +30,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import java.nio.charset.StandardCharsets;
 
 public class TracyPublisher {
+	static final String TRACY_CONTENT_TYPE = MediaType.APPLICATION_JSON 
+			+ ";charset=" + StandardCharsets.UTF_8;
+	
     public TracyPublisher()	{
     }
     
@@ -38,7 +45,7 @@ public class TracyPublisher {
     	HttpEntity entity = response.getEntity();
     	sb.append(response.getStatusLine());
     	sb.append(" ");
-    	sb.append(EntityUtils.toString(entity, "UTF-8"));
+    	sb.append(EntityUtils.toString(entity, StandardCharsets.UTF_8));
     	return sb.toString();
     }
     
@@ -46,14 +53,15 @@ public class TracyPublisher {
     	boolean published = false;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		CloseableHttpResponse response;
+		// TODO: Externalize configuration
 		HttpPost httpPost = new HttpPost("http://localhost:8080/tracy/segment");
 		StringEntity se;
 		
 		try {
-			se = new StringEntity(tracySegment,"UTF-8");
-			se.setContentType("application/json");
+			se = new StringEntity(tracySegment, StandardCharsets.UTF_8);
+			se.setContentType(MediaType.APPLICATION_JSON);
 			httpPost.setEntity(se);
-			httpPost.setHeader("Content-Type","application/json;charset=UTF-8");
+			httpPost.setHeader(HttpHeaders.CONTENT_TYPE,TRACY_CONTENT_TYPE);
 			response = httpclient.execute(httpPost);
 //			System.out.println(extractPostResponse(response));
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)	{
