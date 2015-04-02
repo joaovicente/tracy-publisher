@@ -35,11 +35,20 @@ import java.nio.charset.StandardCharsets;
 public class TracyPublisher {
 	static final String TRACY_CONTENT_TYPE = MediaType.APPLICATION_JSON 
 			+ ";charset=" + StandardCharsets.UTF_8;
+	private String uri;
+	CloseableHttpClient httpClient;
 	
+	// Construction without parameters means noop
     public TracyPublisher()	{
+    	uri = null;
     }
     
-    @SuppressWarnings("unused")
+    public TracyPublisher(String hostname, int port) {
+    	uri = "http://" + hostname + ":" + port + "/tracy/segment";
+    	httpClient = HttpClients.createDefault();
+	}
+
+	@SuppressWarnings("unused")
 	private String extractPostResponse(CloseableHttpResponse response) throws ParseException, IOException	{
     	StringBuilder sb = new StringBuilder(1024);
     	HttpEntity entity = response.getEntity();
@@ -52,25 +61,26 @@ public class TracyPublisher {
     
     public boolean publish(String tracySegment) {
     	boolean published = false;
-		CloseableHttpClient httpclient = HttpClients.createDefault();
-		CloseableHttpResponse response;
-		// TODO: Externalize configuration
-		HttpPost httpPost = new HttpPost("http://localhost:8080/tracy/segment");
-		StringEntity se;
-		
-		try {
-			se = new StringEntity(tracySegment, StandardCharsets.UTF_8);
-			se.setContentType(MediaType.APPLICATION_JSON);
-			httpPost.setEntity(se);
-			httpPost.setHeader(HttpHeaders.CONTENT_TYPE,TRACY_CONTENT_TYPE);
-			response = httpclient.execute(httpPost);
-//			System.out.println(extractPostResponse(response));
-			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)	{
-				published = true;
-			}
-			response.close();
-		} catch (Exception e) {
-		}
+    	if (null != this.uri) {
+    		CloseableHttpResponse response;
+    		// TODO: Externalize configuration
+    		HttpPost httpPost = new HttpPost(uri);
+    		StringEntity se;
+
+    		try {
+    			se = new StringEntity(tracySegment, StandardCharsets.UTF_8);
+    			se.setContentType(MediaType.APPLICATION_JSON);
+    			httpPost.setEntity(se);
+    			httpPost.setHeader(HttpHeaders.CONTENT_TYPE,TRACY_CONTENT_TYPE);
+    			response = httpClient.execute(httpPost);
+    			System.out.println(extractPostResponse(response));
+    			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)	{
+    				published = true;
+    			}
+    			response.close();
+    		} catch (Exception e) {
+    		}
+    	}
 		return published;
     }
 }

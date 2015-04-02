@@ -18,15 +18,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TracyPublisherTest {
+	final String HOSTNAME = "localhost";
+	final int PORT = 8050;
 	TracyPublisher pub;
 	Tomcat tomcat;
 	
 	@Before
 	public void setUp() throws Exception {
-		pub = new TracyPublisher();
+		pub = new TracyPublisher(HOSTNAME, PORT);
 		// Start Tomcat
 		tomcat = new Tomcat();
-		tomcat.setPort(8080);
+		tomcat.setPort(PORT);
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		Context rootCtx = tomcat.addContext("/tracy", base.getAbsolutePath());
 		Tomcat.addServlet(rootCtx, "segment", new TracySegmentLightServlet());
@@ -38,7 +40,7 @@ public class TracyPublisherTest {
 	@SuppressWarnings("unused")
 	private String post(String tracySegment) throws ClientProtocolException, IOException	{
 		CloseableHttpClient httpclient = HttpClients.createDefault();
-		HttpPost httpPost = new HttpPost("http://localhost:8080/tracy/segment");
+		HttpPost httpPost = new HttpPost("http://localhost:8050/tracy/segment");
 		StringEntity se=new StringEntity(tracySegment,"UTF-8");
 		se.setContentType("application/json");
 		httpPost.setEntity(se);
