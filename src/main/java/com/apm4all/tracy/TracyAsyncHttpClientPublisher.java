@@ -32,18 +32,18 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import java.nio.charset.StandardCharsets;
 
-public class TracyPublisher {
+public class TracyAsyncHttpClientPublisher {
 	static final String TRACY_CONTENT_TYPE = MediaType.APPLICATION_JSON 
 			+ ";charset=" + StandardCharsets.UTF_8;
 	private String uri;
 	CloseableHttpClient httpClient;
 	
 	// Construction without parameters means noop
-    public TracyPublisher()	{
+    public TracyAsyncHttpClientPublisher()	{
     	uri = null;
     }
     
-    public TracyPublisher(String hostname, int port) {
+    public TracyAsyncHttpClientPublisher(String hostname, int port) {
     	uri = "http://" + hostname + ":" + port + "/tracy/segment";
     	httpClient = HttpClients.createDefault();
 	}

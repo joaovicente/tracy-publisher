@@ -20,12 +20,12 @@ import org.junit.Test;
 public class TracyPublisherTest {
 	final String HOSTNAME = "localhost";
 	final int PORT = 8050;
-	TracyPublisher pub;
+	TracyCloseableHttpClientPublisher pub;
 	Tomcat tomcat;
 	
 	@Before
 	public void setUp() throws Exception {
-		pub = new TracyPublisher(HOSTNAME, PORT);
+		pub = new TracyCloseableHttpClientPublisher(HOSTNAME, PORT);
 		// Start Tomcat
 		tomcat = new Tomcat();
 		tomcat.setPort(PORT);
