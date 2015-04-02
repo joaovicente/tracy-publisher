@@ -1,8 +1,11 @@
 package com.apm4all.tracy;
 
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
@@ -20,12 +23,14 @@ import org.junit.Test;
 public class TracyPublisherTest {
 	final String HOSTNAME = "localhost";
 	final int PORT = 8050;
-	TracyCloseableHttpClientPublisher pub;
+	TracyAsyncHttpClientPublisher pub;
+//	TracyCloseableHttpClientPublisher pub;
 	Tomcat tomcat;
 	
 	@Before
 	public void setUp() throws Exception {
-		pub = new TracyCloseableHttpClientPublisher(HOSTNAME, PORT);
+		pub = new TracyAsyncHttpClientPublisher(HOSTNAME, PORT);
+//		pub = new TracyCloseableHttpClientPublisher(HOSTNAME, PORT);
 		// Start Tomcat
 		tomcat = new Tomcat();
 		tomcat.setPort(PORT);
@@ -61,13 +66,34 @@ public class TracyPublisherTest {
 	}
 	
 	@Test
-	public void testSingleTracySegmentPost() throws LifecycleException, ClientProtocolException, IOException {
+	public void testSingleTracySegmentPost() throws LifecycleException, ClientProtocolException, IOException, InterruptedException, ExecutionException {
 		Tracy.setContext("MyTask", "null", "MyComponent");
 		Tracy.before("myLabel1");
-		Tracy.before("myLabel1");
+		Tracy.after("myLabel1");
 		// FIXME: replace with Tracy.getEventsAsJson()
 		String tracySegment = Tracy.getEventsAsJson().get(0);
-		assertTrue(pub.publish(tracySegment));
+		assertTrue(pub.publish(tracySegment, TracyAsyncHttpClientPublisher.DONT_WAIT_FOR_RESPONSE));
+		Tracy.clearContext();
+		Thread.sleep(1000);
 	}
 
+	@Test
+	public void testMultipleTracySegmentPost() throws LifecycleException, ClientProtocolException, IOException, InterruptedException, ExecutionException {
+		// FIXME: replace with Tracy.getEventsAsJson()
+		String label;
+		String tracySegment;
+		
+		int i = 1000;
+		while (i>0) {
+			label = "label-" + Integer.toString(i);
+			Tracy.setContext("MyTask", "null", "MyComponent");
+			Tracy.before(label);
+			Tracy.after(label);
+			tracySegment = Tracy.getEventsAsJson().get(0);
+			pub.publish(tracySegment, TracyAsyncHttpClientPublisher.DONT_WAIT_FOR_RESPONSE);
+			i--;
+			System.out.println(i);
+		}
+		Thread.sleep(20000);
+	}
 }

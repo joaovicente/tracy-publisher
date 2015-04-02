@@ -10,5 +10,9 @@ public class TracySegmentLightServlet extends HttpServlet {
 	@Override
 	protected void doPost(final HttpServletRequest req,
 			final HttpServletResponse res) {
+//		try {
+//			Thread.sleep(500);
+//		} catch (InterruptedException e) {
+//		}
 	}
 }

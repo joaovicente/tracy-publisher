@@ -17,26 +17,30 @@
 package com.apm4all.tracy;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Future;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.util.EntityUtils;
-import java.nio.charset.StandardCharsets;
 
-public class TracyAsyncHttpClientPublisher {
+
+public class TracyAsyncHttpClientPublisher implements AutoCloseable {
 	static final String TRACY_CONTENT_TYPE = MediaType.APPLICATION_JSON 
 			+ ";charset=" + StandardCharsets.UTF_8;
+	public static boolean WAIT_FOR_RESPONSE = true;
+	public static boolean DONT_WAIT_FOR_RESPONSE = false;
 	private String uri;
-	CloseableHttpClient httpClient;
+	CloseableHttpAsyncClient httpClient;
 	
 	// Construction without parameters means noop
     public TracyAsyncHttpClientPublisher()	{
@@ -45,11 +49,12 @@ public class TracyAsyncHttpClientPublisher {
     
     public TracyAsyncHttpClientPublisher(String hostname, int port) {
     	uri = "http://" + hostname + ":" + port + "/tracy/segment";
-    	httpClient = HttpClients.createDefault();
+        this.httpClient = HttpAsyncClients.custom().build();
+        this.httpClient.start();
 	}
 
 	@SuppressWarnings("unused")
-	private String extractPostResponse(CloseableHttpResponse response) throws ParseException, IOException	{
+	private String extractPostResponse(HttpResponse response) throws ParseException, IOException	{
     	StringBuilder sb = new StringBuilder(1024);
     	HttpEntity entity = response.getEntity();
     	sb.append(response.getStatusLine());
@@ -58,29 +63,30 @@ public class TracyAsyncHttpClientPublisher {
 		EntityUtils.consume(entity);
     	return sb.toString();
     }
-    
-    public boolean publish(String tracySegment) {
-    	boolean published = false;
+   
+    public boolean publish(String tracySegment, boolean waitForResponse) {
+    	boolean published = true;
     	if (null != this.uri) {
-    		CloseableHttpResponse response;
-    		// TODO: Externalize configuration
     		HttpPost httpPost = new HttpPost(uri);
     		StringEntity se;
-
     		try {
-    			se = new StringEntity(tracySegment, StandardCharsets.UTF_8);
-    			se.setContentType(MediaType.APPLICATION_JSON);
-    			httpPost.setEntity(se);
-    			httpPost.setHeader(HttpHeaders.CONTENT_TYPE,TRACY_CONTENT_TYPE);
-    			response = httpClient.execute(httpPost);
-    			System.out.println(extractPostResponse(response));
-    			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)	{
-    				published = true;
-    			}
-    			response.close();
-    		} catch (Exception e) {
-    		}
+				se = new StringEntity(tracySegment, StandardCharsets.UTF_8);
+				se.setContentType(MediaType.APPLICATION_JSON);
+				httpPost.setEntity(se);
+				httpPost.setHeader(HttpHeaders.CONTENT_TYPE,TRACY_CONTENT_TYPE);
+				Future<HttpResponse> future = httpClient.execute(httpPost, null);
+				if (waitForResponse)	{
+					HttpResponse response = future.get();
+					published = (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
+					System.out.println(extractPostResponse(response));
+				}
+			} catch (Exception e) {
+			}
     	}
 		return published;
     }
+
+	public void close() throws Exception {
+		this.httpClient.close();
+	}
 }
