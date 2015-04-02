@@ -73,7 +73,7 @@ public class TracyCloseableHttpClientPublisher {
     			httpPost.setEntity(se);
     			httpPost.setHeader(HttpHeaders.CONTENT_TYPE,TRACY_CONTENT_TYPE);
     			response = httpClient.execute(httpPost);
-    			System.out.println(extractPostResponse(response));
+//    			System.out.println(extractPostResponse(response));
     			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)	{
     				published = true;
     			}

@@ -78,7 +78,7 @@ public class TracyAsyncHttpClientPublisher implements AutoCloseable {
 				if (waitForResponse)	{
 					HttpResponse response = future.get();
 					published = (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
-					System.out.println(extractPostResponse(response));
+//					System.out.println(extractPostResponse(response));
 				}
 			} catch (Exception e) {
 			}

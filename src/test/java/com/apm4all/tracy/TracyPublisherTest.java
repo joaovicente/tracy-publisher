@@ -31,7 +31,6 @@ public class TracyPublisherTest {
 	@Before
 	public void setUp() throws Exception {
 		pub = new TracyAsyncHttpClientPublisher(HOSTNAME, PORT);
-//		pub = new TracyCloseableHttpClientPublisher(HOSTNAME, PORT);
 		// Start Tomcat
 		tomcat = new Tomcat();
 		tomcat.setPort(PORT);
@@ -40,14 +39,12 @@ public class TracyPublisherTest {
 		Tomcat.addServlet(rootCtx, "segment", new TracySegmentLightServlet());
 		rootCtx.addServletMapping("/segment", "segment");
 		tomcat.start();
-//		tomcat.getServer().await();
 	}
 	
 	@After
 	public void tearDown() throws LifecycleException, InterruptedException {
 		tomcat.stop();
 		tomcat.destroy();
-//		Thread.sleep(5000);
 	}
 
 	@SuppressWarnings("unused")
@@ -75,12 +72,12 @@ public class TracyPublisherTest {
 	
 	@Test
 	public void testSingleTracySegmentPost() throws LifecycleException, ClientProtocolException, IOException, InterruptedException, ExecutionException {
-		System.out.println("testSingleTracySegmentPost");
 		Tracy.setContext("MyTask", "null", "MyComponent");
 		Tracy.before("myLabel1");
 		Tracy.after("myLabel1");
 		// FIXME: replace with Tracy.getEventsAsJson()
 		String tracySegment = Tracy.getEventsAsJson().get(0);
+		System.out.println("Publishing Tracy segment");
 		assertTrue(pub.publish(tracySegment, TracyAsyncHttpClientPublisher.WAIT_FOR_RESPONSE));
 		Tracy.clearContext();
 		Thread.sleep(1000);
@@ -91,8 +88,6 @@ public class TracyPublisherTest {
 		// FIXME: replace with Tracy.getEventsAsJson()
 		String label;
 		String tracySegment;
-		
-		System.out.println("testMultipleTracySegmentPost");
 		int i = 0;
 		while (i<1000) {
 			label = "label-" + Integer.toString(i);
@@ -103,8 +98,10 @@ public class TracyPublisherTest {
 			assertTrue(pub.publish(tracySegment, TracyAsyncHttpClientPublisher.WAIT_FOR_RESPONSE));
 			i++;
 			Tracy.clearContext();
-			System.out.println("Publishing Tracy segment " + i);
+			if (i % 100 == 0)	{
+				System.out.println("Publishing Tracy segment " + i);
+			}
 		}
-		Thread.sleep(5000);
+		Thread.sleep(1000);
 	}
 }
