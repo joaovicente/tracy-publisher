@@ -17,6 +17,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,6 +41,13 @@ public class TracyPublisherTest {
 		rootCtx.addServletMapping("/segment", "segment");
 		tomcat.start();
 //		tomcat.getServer().await();
+	}
+	
+	@After
+	public void tearDown() throws LifecycleException, InterruptedException {
+		tomcat.stop();
+		tomcat.destroy();
+//		Thread.sleep(5000);
 	}
 
 	@SuppressWarnings("unused")
@@ -67,12 +75,13 @@ public class TracyPublisherTest {
 	
 	@Test
 	public void testSingleTracySegmentPost() throws LifecycleException, ClientProtocolException, IOException, InterruptedException, ExecutionException {
+		System.out.println("testSingleTracySegmentPost");
 		Tracy.setContext("MyTask", "null", "MyComponent");
 		Tracy.before("myLabel1");
 		Tracy.after("myLabel1");
 		// FIXME: replace with Tracy.getEventsAsJson()
 		String tracySegment = Tracy.getEventsAsJson().get(0);
-		assertTrue(pub.publish(tracySegment, TracyAsyncHttpClientPublisher.DONT_WAIT_FOR_RESPONSE));
+		assertTrue(pub.publish(tracySegment, TracyAsyncHttpClientPublisher.WAIT_FOR_RESPONSE));
 		Tracy.clearContext();
 		Thread.sleep(1000);
 	}
@@ -83,17 +92,19 @@ public class TracyPublisherTest {
 		String label;
 		String tracySegment;
 		
-		int i = 1000;
-		while (i>0) {
+		System.out.println("testMultipleTracySegmentPost");
+		int i = 0;
+		while (i<1000) {
 			label = "label-" + Integer.toString(i);
 			Tracy.setContext("MyTask", "null", "MyComponent");
 			Tracy.before(label);
 			Tracy.after(label);
 			tracySegment = Tracy.getEventsAsJson().get(0);
-			pub.publish(tracySegment, TracyAsyncHttpClientPublisher.DONT_WAIT_FOR_RESPONSE);
-			i--;
-			System.out.println(i);
+			assertTrue(pub.publish(tracySegment, TracyAsyncHttpClientPublisher.WAIT_FOR_RESPONSE));
+			i++;
+			Tracy.clearContext();
+			System.out.println("Publishing Tracy segment " + i);
 		}
-		Thread.sleep(20000);
+		Thread.sleep(5000);
 	}
 }
