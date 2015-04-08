@@ -33,27 +33,25 @@ import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.util.EntityUtils;
 
-
-public class TracyAsyncHttpClientPublisher implements AutoCloseable {
+public class TracyAsyncHttpClientPublisher implements TracyPublisher, AutoCloseable {
 	static final String TRACY_CONTENT_TYPE = MediaType.APPLICATION_JSON 
 			+ ";charset=" + StandardCharsets.UTF_8;
 	public static boolean WAIT_FOR_RESPONSE = true;
 	public static boolean DONT_WAIT_FOR_RESPONSE = false;
 	private String uri;
+	private boolean waitForResponse;
+	private boolean debug;
 	CloseableHttpAsyncClient httpClient;
-	
-	// Construction without parameters means noop
-    public TracyAsyncHttpClientPublisher()	{
-    	uri = null;
+	static TracyAsyncHttpClientPublisher pub;
+
+    TracyAsyncHttpClientPublisher(String hostname, int port, boolean waitForResponse, boolean debug)	{
+    	this.uri = "http://" + hostname + ":" + port + "/tracy/segment";
+    	this.waitForResponse = waitForResponse;
+    	this.debug = debug;
+    	this.httpClient = HttpAsyncClients.custom().build();
+        this.httpClient.start();
     }
     
-    public TracyAsyncHttpClientPublisher(String hostname, int port) {
-    	uri = "http://" + hostname + ":" + port + "/tracy/segment";
-        this.httpClient = HttpAsyncClients.custom().build();
-        this.httpClient.start();
-	}
-
-	@SuppressWarnings("unused")
 	private String extractPostResponse(HttpResponse response) throws ParseException, IOException	{
     	StringBuilder sb = new StringBuilder(1024);
     	HttpEntity entity = response.getEntity();
@@ -63,8 +61,9 @@ public class TracyAsyncHttpClientPublisher implements AutoCloseable {
 		EntityUtils.consume(entity);
     	return sb.toString();
     }
-   
-    public boolean publish(String tracySegment, boolean waitForResponse) {
+
+	@Override
+	public boolean publish(String tracySegment) {
     	boolean published = true;
     	if (null != this.uri) {
     		HttpPost httpPost = new HttpPost(uri);
@@ -78,7 +77,9 @@ public class TracyAsyncHttpClientPublisher implements AutoCloseable {
 				if (waitForResponse)	{
 					HttpResponse response = future.get();
 					published = (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
-//					System.out.println(extractPostResponse(response));
+					if (debug)	{
+						System.out.println(extractPostResponse(response));
+					}
 				}
 			} catch (Exception e) {
 			}

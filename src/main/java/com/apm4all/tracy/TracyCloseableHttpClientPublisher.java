@@ -32,23 +32,19 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import java.nio.charset.StandardCharsets;
 
-public class TracyCloseableHttpClientPublisher {
+public class TracyCloseableHttpClientPublisher implements TracyPublisher{
 	static final String TRACY_CONTENT_TYPE = MediaType.APPLICATION_JSON 
 			+ ";charset=" + StandardCharsets.UTF_8;
 	private String uri;
+	private boolean debug;
 	CloseableHttpClient httpClient;
 	
-	// Construction without parameters means noop
-    public TracyCloseableHttpClientPublisher()	{
-    	uri = null;
-    }
-    
-    public TracyCloseableHttpClientPublisher(String hostname, int port) {
+    public TracyCloseableHttpClientPublisher(String hostname, int port, boolean debug) {
     	uri = "http://" + hostname + ":" + port + "/tracy/segment";
+    	this.debug = debug;
     	httpClient = HttpClients.createDefault();
 	}
 
-	@SuppressWarnings("unused")
 	private String extractPostResponse(CloseableHttpResponse response) throws ParseException, IOException	{
     	StringBuilder sb = new StringBuilder(1024);
     	HttpEntity entity = response.getEntity();
@@ -59,6 +55,7 @@ public class TracyCloseableHttpClientPublisher {
     	return sb.toString();
     }
     
+	@Override
     public boolean publish(String tracySegment) {
     	boolean published = false;
     	if (null != this.uri) {
@@ -73,7 +70,9 @@ public class TracyCloseableHttpClientPublisher {
     			httpPost.setEntity(se);
     			httpPost.setHeader(HttpHeaders.CONTENT_TYPE,TRACY_CONTENT_TYPE);
     			response = httpClient.execute(httpPost);
-//    			System.out.println(extractPostResponse(response));
+    			if (debug)	{
+    				System.out.println(extractPostResponse(response));
+    			}
     			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)	{
     				published = true;
     			}

@@ -24,13 +24,16 @@ import org.junit.Test;
 public class TracyPublisherTest {
 	final String HOSTNAME = "localhost";
 	final int PORT = 8050;
-	TracyAsyncHttpClientPublisher pub;
-//	TracyCloseableHttpClientPublisher pub;
 	Tomcat tomcat;
 	
 	@Before
 	public void setUp() throws Exception {
-		pub = new TracyAsyncHttpClientPublisher(HOSTNAME, PORT);
+		new TracyPublisherFactory.Builder(TracyPublisherFactory.Type.HTTP_CLIENT)
+			.hostname(HOSTNAME)
+			.port(PORT)
+//			.waitForResponse(true)
+//			.debug(true)
+			.build();
 		// Start Tomcat
 		tomcat = new Tomcat();
 		tomcat.setPort(PORT);
@@ -78,7 +81,8 @@ public class TracyPublisherTest {
 		// FIXME: replace with Tracy.getEventsAsJson()
 		String tracySegment = Tracy.getEventsAsJson().get(0);
 		System.out.println("Publishing Tracy segment");
-		assertTrue(pub.publish(tracySegment, TracyAsyncHttpClientPublisher.WAIT_FOR_RESPONSE));
+		
+		assertTrue(TracyPublisherFactory.getInstance().publish(tracySegment));
 		Tracy.clearContext();
 		Thread.sleep(1000);
 	}
@@ -95,7 +99,7 @@ public class TracyPublisherTest {
 			Tracy.before(label);
 			Tracy.after(label);
 			tracySegment = Tracy.getEventsAsJson().get(0);
-			assertTrue(pub.publish(tracySegment, TracyAsyncHttpClientPublisher.WAIT_FOR_RESPONSE));
+			assertTrue(TracyPublisherFactory.getInstance().publish(tracySegment));
 			i++;
 			Tracy.clearContext();
 			if (i % 100 == 0)	{
