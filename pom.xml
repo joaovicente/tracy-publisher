@@ -6,7 +6,7 @@
 	<groupId>com.apm4all.tracy</groupId>
 	<artifactId>tracy-publisher</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>tracy-publisher</name>
 	<description>Library used to publish JVM generated Tracy to a Tracy store</description>
 	<url>http://www.apm4all.com</url>
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>com.apm4all.tracy</groupId>
 			<artifactId>Tracy</artifactId>
-			<version>2.4.1</version>
+			<version>3.0.0</version>
 			<scope>test</scope>
         </dependency>
         <dependency>

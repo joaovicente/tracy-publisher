@@ -23,6 +23,7 @@ import org.junit.Test;
 
 public class TracyPublisherTest {
 	final String HOSTNAME = "localhost";
+	// TODO: Find an unused TCP port at test time (in case 8050 is being used by something else)
 	final int PORT = 8050;
 	Tomcat tomcat;
 	
@@ -76,10 +77,9 @@ public class TracyPublisherTest {
 	@Test
 	public void testSingleTracySegmentPost() throws LifecycleException, ClientProtocolException, IOException, InterruptedException, ExecutionException {
 		Tracy.setContext("MyTask", "null", "MyComponent");
-		Tracy.before("myLabel1");
-		Tracy.after("myLabel1");
-		// FIXME: replace with Tracy.getEventsAsJson()
-		String tracySegment = Tracy.getEventsAsJson().get(0);
+		Tracy.before("myLabel");
+		Tracy.after("myLabel");
+		String tracySegment = Tracy.getEventsAsJsonArray();
 		System.out.println("Publishing Tracy segment");
 		
 		assertTrue(TracyPublisherFactory.getInstance().publish(tracySegment));
@@ -90,15 +90,18 @@ public class TracyPublisherTest {
 	@Test
 	public void testMultipleTracySegmentPost() throws LifecycleException, ClientProtocolException, IOException, InterruptedException, ExecutionException {
 		// FIXME: replace with Tracy.getEventsAsJson()
-		String label;
+		String labelA, labelB;
 		String tracySegment;
 		int i = 0;
 		while (i<1000) {
-			label = "label-" + Integer.toString(i);
+			labelA = "label-a-" + Integer.toString(i);
+			labelB = "label-b-" + Integer.toString(i);
 			Tracy.setContext("MyTask", "null", "MyComponent");
-			Tracy.before(label);
-			Tracy.after(label);
-			tracySegment = Tracy.getEventsAsJson().get(0);
+			Tracy.before(labelA);
+			Tracy.after(labelA);
+			Tracy.before(labelB);
+			Tracy.after(labelB);
+			tracySegment = Tracy.getEventsAsJsonArray();
 			assertTrue(TracyPublisherFactory.getInstance().publish(tracySegment));
 			i++;
 			Tracy.clearContext();
