@@ -79,7 +79,7 @@ public class TracyPublisherTest {
 		Tracy.setContext("MyTask", "null", "MyComponent");
 		Tracy.before("myLabel");
 		Tracy.after("myLabel");
-		String tracySegment = Tracy.getEventsAsJsonArray();
+		String tracySegment = Tracy.getEventsAsJsonTracySegment();
 		System.out.println("Publishing Tracy segment");
 		
 		assertTrue(TracyPublisherFactory.getInstance().publish(tracySegment));
@@ -101,7 +101,7 @@ public class TracyPublisherTest {
 			Tracy.after(labelA);
 			Tracy.before(labelB);
 			Tracy.after(labelB);
-			tracySegment = Tracy.getEventsAsJsonArray();
+			tracySegment = Tracy.getEventsAsJsonTracySegment();
 			assertTrue(TracyPublisherFactory.getInstance().publish(tracySegment));
 			i++;
 			Tracy.clearContext();

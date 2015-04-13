@@ -13,5 +13,5 @@ Library used to publish JVM generated Tracy to a Tracy store
 		Tracy.setContext("MyTask", PARENT_OPT_ID, "MyComponent");
 		Tracy.before("myLabel");
 		Tracy.after("myLabel")
-		TracyPublisherFactory.getInstance().publish(Tracy.getEventsAsJsonArray())
+		TracyPublisherFactory.getInstance().publish(Tracy.getEventsAsJsonTracySegment())
 ```
