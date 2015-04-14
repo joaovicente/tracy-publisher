@@ -30,6 +30,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+
 import java.nio.charset.StandardCharsets;
 
 public class TracyCloseableHttpClientPublisher implements TracyPublisher{
@@ -39,8 +40,8 @@ public class TracyCloseableHttpClientPublisher implements TracyPublisher{
 	private boolean debug;
 	CloseableHttpClient httpClient;
 	
-    public TracyCloseableHttpClientPublisher(String hostname, int port, boolean debug) {
-    	uri = "http://" + hostname + ":" + port + "/tracy/segment";
+    public TracyCloseableHttpClientPublisher(String hostname, int port, String resourcePath, boolean debug) {
+    	uri = "http://" + hostname + ":" + port + "/" + resourcePath;
     	this.debug = debug;
     	httpClient = HttpClients.createDefault();
 	}

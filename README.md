@@ -3,7 +3,7 @@ Library used to publish JVM generated Tracy to a Tracy store
 
 ## Usage
 ```
-		new TracyPublisherFactory.Builder(TracyPublisherFactory.Type.HTTP_ASYNC_CLIENT)
+		new TracyPublisherFactory.Builder(TracyPublisherFactory.Type.HTTP_CLIENT)
 			.hostname("localhost")
 			.port(8050)
 			.build();

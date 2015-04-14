@@ -29,7 +29,7 @@ public class TracyPublisherTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		new TracyPublisherFactory.Builder(TracyPublisherFactory.Type.HTTP_ASYNC_CLIENT)
+		new TracyPublisherFactory.Builder(TracyPublisherFactory.Type.HTTP_CLIENT)
 			.hostname(HOSTNAME)
 			.port(PORT)
 //			.waitForResponse(true)

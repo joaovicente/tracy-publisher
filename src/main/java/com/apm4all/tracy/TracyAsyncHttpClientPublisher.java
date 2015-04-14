@@ -18,17 +18,25 @@ package com.apm4all.tracy;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.concurrent.Future;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.AuthSchemes;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.util.EntityUtils;
@@ -43,12 +51,26 @@ public class TracyAsyncHttpClientPublisher implements TracyPublisher, AutoClosea
 	private boolean debug;
 	CloseableHttpAsyncClient httpClient;
 	static TracyAsyncHttpClientPublisher pub;
+	private HttpProxyConfig httpProxyConfig;
 
-    TracyAsyncHttpClientPublisher(String hostname, int port, boolean waitForResponse, boolean debug)	{
-    	this.uri = "http://" + hostname + ":" + port + "/tracy/segment";
+    TracyAsyncHttpClientPublisher(String hostname, int port, boolean waitForResponse, String resourcePath, HttpProxyConfig httpProxyConfig, boolean debug)	{
+    	this.uri = "http://" + hostname + ":" + port + "/" + resourcePath;
     	this.waitForResponse = waitForResponse;
+    	this.httpProxyConfig = httpProxyConfig;
     	this.debug = debug;
-    	this.httpClient = HttpAsyncClients.custom().build();
+    	if (httpProxyConfig.isEnabled())	{
+    		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+    		credsProvider
+    		.setCredentials(
+    				new AuthScope(httpProxyConfig.getHost(), httpProxyConfig.getPort()),
+    				new UsernamePasswordCredentials(httpProxyConfig.getUsername(), httpProxyConfig
+    						.getPassword()));
+    		this.httpClient = HttpAsyncClients.custom().setDefaultCredentialsProvider(credsProvider).build();
+    		
+    	}
+    	else	{
+    		this.httpClient = HttpAsyncClients.custom().build();
+    	}
         this.httpClient.start();
     }
     
@@ -65,8 +87,18 @@ public class TracyAsyncHttpClientPublisher implements TracyPublisher, AutoClosea
 	@Override
 	public boolean publish(String tracySegment) {
     	boolean published = true;
+    	HttpPost httpPost;
     	if (null != this.uri) {
-    		HttpPost httpPost = new HttpPost(uri);
+        	if (httpProxyConfig.isEnabled())	{
+        		HttpHost proxy = new HttpHost(httpProxyConfig.getHost(), httpProxyConfig.getPort(), "http");
+        		RequestConfig reqConfig = RequestConfig.custom().setProxy(proxy).setAuthenticationEnabled(true)
+        				.setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC)).build();
+        		httpPost = new HttpPost(uri);
+        		httpPost.setConfig(reqConfig);
+        	}
+        	else	{
+        		httpPost = new HttpPost(uri);
+        	}
     		StringEntity se;
     		try {
 				se = new StringEntity(tracySegment, StandardCharsets.UTF_8);
