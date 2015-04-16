@@ -32,7 +32,7 @@ public class TracyPublisherTest {
 		new TracyPublisherFactory.Builder(TracyPublisherFactory.Type.HTTP_CLIENT)
 			.hostname(HOSTNAME)
 			.port(PORT)
-//			.waitForResponse(true)
+			.waitForResponse(true)
 //			.debug(true)
 			.build();
 		// Start Tomcat

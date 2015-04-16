@@ -2,7 +2,7 @@ package com.apm4all.tracy;
 
 public class TracyPublisherFactory {
 	static private TracyPublisher tracyPublisher = null;
-	static String DEFAULT_RESOURCE_PATH = "tracy/Segment";
+	static String DEFAULT_RESOURCE_PATH = "tracy/segment";
 	static public enum Type {
 		NOOP,
 		HTTP_CLIENT
