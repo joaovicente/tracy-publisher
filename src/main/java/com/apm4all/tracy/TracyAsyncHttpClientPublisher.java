@@ -86,7 +86,7 @@ public class TracyAsyncHttpClientPublisher implements TracyPublisher, AutoClosea
 
 	@Override
 	public boolean publish(String tracySegment) {
-    	boolean published = true;
+    	boolean published = false;
     	HttpPost httpPost;
     	if (null != this.uri) {
         	if (httpProxyConfig.isEnabled())	{
@@ -112,6 +112,9 @@ public class TracyAsyncHttpClientPublisher implements TracyPublisher, AutoClosea
 					if (debug)	{
 						System.out.println(extractPostResponse(response));
 					}
+				}
+				else	{
+					published = true;
 				}
 			} catch (Exception e) {
 			}

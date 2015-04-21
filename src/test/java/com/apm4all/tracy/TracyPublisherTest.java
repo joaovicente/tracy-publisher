@@ -32,7 +32,8 @@ public class TracyPublisherTest {
 		new TracyPublisherFactory.Builder(TracyPublisherFactory.Type.HTTP_CLIENT)
 			.hostname(HOSTNAME)
 			.port(PORT)
-			.waitForResponse(true)
+			// waitForResponse allows testing publish() received a 2xx http status
+			.waitForResponse(true) 
 //			.debug(true)
 			.build();
 		// Start Tomcat
@@ -89,7 +90,6 @@ public class TracyPublisherTest {
 
 	@Test
 	public void testMultipleTracySegmentPost() throws LifecycleException, ClientProtocolException, IOException, InterruptedException, ExecutionException {
-		// FIXME: replace with Tracy.getEventsAsJson()
 		String labelA, labelB;
 		String tracySegment;
 		int i = 0;
@@ -102,6 +102,9 @@ public class TracyPublisherTest {
 			Tracy.before(labelB);
 			Tracy.after(labelB);
 			tracySegment = Tracy.getEventsAsJsonTracySegment();
+//			for (String event : Tracy.getEventsAsJson())	{
+//				System.out.println(event);
+//			}
 			assertTrue(TracyPublisherFactory.getInstance().publish(tracySegment));
 			i++;
 			Tracy.clearContext();
